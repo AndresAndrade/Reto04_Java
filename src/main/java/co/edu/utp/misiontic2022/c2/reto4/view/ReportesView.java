@@ -27,7 +27,7 @@ public class ReportesView {
                     "ID", "CONSTRUCTORA", "CIUDAD", "CLASIFICACION", "ESTRATO", "LIDER"));
             System.out.println(repitaCaracter('-', 105));
 
-            List<ProyectoBancoVo> listaProyectos = controller.buscarComprasDeLider("Conavi");
+            List<ProyectoBancoVo> listaProyectos = controller.buscarComprasDeLider(banco);
             for (ProyectoBancoVo proyecto : listaProyectos) {
                 System.out.printf("%3d %-25s %-20s %-15s %7d %-30s%n", proyecto.getIdProyecto(), proyecto.getConstructora(),
                         proyecto.getCiudad(), proyecto.getClasificacion(), proyecto.getEstrato(), proyecto.getLider());
