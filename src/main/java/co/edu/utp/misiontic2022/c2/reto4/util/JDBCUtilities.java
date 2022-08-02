@@ -1,4 +1,4 @@
-package reto4.util;
+package co.edu.utp.misiontic2022.c2.reto4.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
