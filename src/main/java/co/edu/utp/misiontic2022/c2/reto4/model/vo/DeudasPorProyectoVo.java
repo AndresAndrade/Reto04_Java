@@ -23,9 +23,6 @@ public class DeudasPorProyectoVo {
 
     @Override
     public String toString() {
-        return "DeudasPorProyectoVo{" +
-                "idProyecto=" + idProyecto +
-                ", valor=" + valor +
-                '}';
+        return String.format("%3d %,15.1f", idProyecto, valor);
     }
 }

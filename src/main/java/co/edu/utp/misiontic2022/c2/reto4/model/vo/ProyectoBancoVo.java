@@ -59,13 +59,8 @@ public class ProyectoBancoVo {
 
     @Override
     public String toString() {
-        return "ProyectoBancoVo{" +
-                "idProyecto=" + idProyecto +
-                ", constructora='" + constructora + '\'' +
-                ", ciudad='" + ciudad + '\'' +
-                ", clasificacion='" + clasificacion + '\'' +
-                ", estrato=" + estrato +
-                ", lider='" + lider + '\'' +
-                '}';
+        return String.format("%3d %-25s %-20s %-15s %7d %-30s",
+                idProyecto, constructora, ciudad, clasificacion, estrato, lider);
+
     }
 }

@@ -19,7 +19,7 @@ public class ProyectoBancoDao {
                                                 "ORDER BY  Fecha_Inicio DESC, Ciudad, Constructora";
 
     public List<ProyectoBancoVo> buscarProyectosBanco(String nombreBanco) throws SQLException {
-        List<ProyectoBancoVo> listaComprasDeLider = new ArrayList<>();
+        List<ProyectoBancoVo> listaProyectosBanco = new ArrayList<>();
         Connection connection = null;
         PreparedStatement pstm = null;
         ResultSet rs = null;
@@ -38,7 +38,7 @@ public class ProyectoBancoDao {
                 proyectoBancoVo.setClasificacion(rs.getString(4));
                 proyectoBancoVo.setEstrato(rs.getInt(5));
                 proyectoBancoVo.setLider(rs.getString(6));
-                listaComprasDeLider.add(proyectoBancoVo);
+                listaProyectosBanco.add(proyectoBancoVo);
             }
 
         } finally {
@@ -48,12 +48,11 @@ public class ProyectoBancoDao {
             if (pstm != null) {
                 pstm.close();
             }
-
             if (connection != null) {
                 connection.close();
             }
         }
-        return listaComprasDeLider;
+        return listaProyectosBanco;
     }
 
 }

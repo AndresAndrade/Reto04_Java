@@ -29,8 +29,7 @@ public class ReportesView {
 
             List<ProyectoBancoVo> listaProyectos = controller.buscarProyectosBanco(banco);
             for (ProyectoBancoVo proyecto : listaProyectos) {
-                System.out.printf("%3d %-25s %-20s %-15s %7d %-30s%n", proyecto.getIdProyecto(), proyecto.getConstructora(),
-                        proyecto.getCiudad(), proyecto.getClasificacion(), proyecto.getEstrato(), proyecto.getLider());
+                System.out.println(proyecto);
             }
         }
     }
@@ -44,7 +43,7 @@ public class ReportesView {
 
             List<DeudasPorProyectoVo> listaDeudas = controller.buscarDeudasPorProyecto(limiteInferior);
             for (DeudasPorProyectoVo proyecto : listaDeudas) {
-                System.out.printf("%3d %,15.1f%n", proyecto.getIdProyecto(), proyecto.getValor());
+                System.out.println(proyecto);;
             }
         }
     }
@@ -57,7 +56,7 @@ public class ReportesView {
 
         List<ComprasDeLiderVo> listaCompras = controller.buscarComprasDelLider();
         for (ComprasDeLiderVo proyecto : listaCompras) {
-            System.out.printf("%-25s %,15.1f%n", proyecto.getLider(), proyecto.getValor());
+            System.out.println(proyecto);;
         }
     }
 }

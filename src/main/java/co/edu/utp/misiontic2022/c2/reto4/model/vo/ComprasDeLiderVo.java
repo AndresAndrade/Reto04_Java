@@ -23,9 +23,6 @@ public class ComprasDeLiderVo {
 
     @Override
     public String toString() {
-        return "ComprasDeLiderVo{" +
-                "lider='" + lider + '\'' +
-                ", valor=" + valor +
-                '}';
+        return String.format("%-25s %,15.1f", lider, valor);
     }
 }

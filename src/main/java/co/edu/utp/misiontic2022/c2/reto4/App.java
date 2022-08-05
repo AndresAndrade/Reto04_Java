@@ -8,15 +8,15 @@ public class App {
         ReportesView reportesView = new ReportesView();
 
         //1.Proyectos financiados por bancos
-        var banco = "Conavi";
-        reportesView.proyectosFinanciadosPorBanco(banco);
+        /*var banco = "Conavi";
+        reportesView.proyectosFinanciadosPorBanco(banco);*/
 
         //2. Deudas por proyecto
-        //var limiteInferior = 100_000d;
-        //reportesView.totalAdeudadoPorProyectosSuperioresALimite(limiteInferior);
+        /*var limiteInferior = 50_000d;
+        reportesView.totalAdeudadoPorProyectosSuperioresALimite(limiteInferior);*/
 
         //3. Lideres que ams gastan
-        //reportesView.lideresQueMasGastan();
+        reportesView.lideresQueMasGastan();
 
     }
 }
