@@ -37,9 +37,9 @@ public class ReportesController {
         }
     }
 
-    public List<ProyectoBancoVo> buscarComprasDeLider(String nombreBanco) {
+    public List<ProyectoBancoVo> buscarProyectosBanco(String nombreBanco) {
         try {
-            return proyectoBancoDao.buscarComprasDeLider(nombreBanco);
+            return proyectoBancoDao.buscarProyectosBanco(nombreBanco);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

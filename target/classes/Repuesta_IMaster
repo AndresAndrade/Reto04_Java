@@ -1,0 +1,391 @@
+import java.sql.SQLException;
+import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.sql.DriverManager;
+
+
+public class ReportesController {
+    private final ComprasDeLiderDao comprasDeLiderDao;
+    private final DeudasPorProyectoDao deudasPorProyectoDao;
+    private final ProyectoBancoDao proyectoBancoDao;
+
+    public ReportesController() {
+        this.comprasDeLiderDao = new ComprasDeLiderDao();
+        this.deudasPorProyectoDao = new DeudasPorProyectoDao();
+        this.proyectoBancoDao = new ProyectoBancoDao();
+    }
+
+    public List<ComprasDeLiderVo> buscarComprasDelLider() {
+        try {
+            return comprasDeLiderDao.buscarComprasDelLider();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<DeudasPorProyectoVo> buscarDeudasPorProyecto(Double limite) {
+        try {
+            return deudasPorProyectoDao.buscarDeudasPorProyecto(limite);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<ProyectoBancoVo> buscarComprasDeLider(String nombreBanco) {
+        try {
+            return proyectoBancoDao.buscarComprasDeLider(nombreBanco);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+
+
+
+public class ComprasDeLiderDao {
+    private final String queryComprasLider = "SELECT (l.Nombre || ' ' || l.Primer_Apellido || ' ' || l.Segundo_Apellido) LIDER, sum(c.Cantidad * m.Precio_Unidad) VALOR \n" +
+            "FROM Lider l\n" +
+            "JOIN Proyecto p ON l.ID_Lider = p.ID_Lider\n" +
+            "JOIN Compra c ON p.ID_Proyecto = c.ID_Proyecto\n" +
+            "JOIN MaterialConstruccion m ON c.ID_MaterialConstruccion = m.ID_MaterialConstruccion \n" +
+            "GROUP BY LIDER\n" +
+            "ORDER BY VALOR DESC\n" +
+            "LIMIT 10";
+
+    public List<ComprasDeLiderVo> buscarComprasDelLider() throws SQLException {
+        List<ComprasDeLiderVo> comprasDeLider = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement pstm = null;
+        ResultSet rs = null;
+
+        try {
+            connection = JDBCUtilities.getConnection();
+            pstm = connection.prepareStatement(queryComprasLider);
+            rs = pstm.executeQuery();
+
+            while (rs.next()) {
+                ComprasDeLiderVo compraDelLider = new ComprasDeLiderVo();
+                compraDelLider.setLider(rs.getString(1));
+                compraDelLider.setValor(rs.getDouble(2));
+                comprasDeLider.add(compraDelLider);
+            }
+
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pstm != null) {
+                pstm.close();
+            }
+
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        return comprasDeLider;
+
+    }
+
+}
+
+
+public class DeudasPorProyectoDao {
+
+    private final String queryDeudas = "SELECT p.ID_Proyecto, sum(c.Cantidad * m.Precio_Unidad) VALOR\n" +
+            "FROM Proyecto p \n" +
+            "JOIN Compra c ON p.ID_Proyecto = c.ID_Proyecto \n" +
+            "JOIN MaterialConstruccion m ON c.ID_MaterialConstruccion = m.ID_MaterialConstruccion\n" +
+            "WHERE c.Pagado = 'No'\n" +
+            "GROUP BY p.ID_Proyecto HAVING VALOR > ?\n" +
+            "ORDER BY VALOR DESC";
+
+    public List<DeudasPorProyectoVo> buscarDeudasPorProyecto(Double limite) throws SQLException {
+        List<DeudasPorProyectoVo> deudasPorProyecto = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement pstm = null;
+        ResultSet rs = null;
+
+        try {
+            connection = JDBCUtilities.getConnection();
+            pstm = connection.prepareStatement(queryDeudas);
+            pstm.setDouble(1, limite);
+            rs = pstm.executeQuery();
+
+            while (rs.next()) {
+                DeudasPorProyectoVo deudaPorProyecto = new DeudasPorProyectoVo();
+                deudaPorProyecto.setIdProyecto(rs.getInt(1));
+                deudaPorProyecto.setValor(rs.getDouble(2));
+                deudasPorProyecto.add(deudaPorProyecto);
+            }
+
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pstm != null) {
+                pstm.close();
+            }
+
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        return deudasPorProyecto;
+
+    }
+
+}
+
+
+public class ProyectoBancoDao {
+
+    private final String queryProyectoBanco = "SELECT p.ID_Proyecto ID, p.Constructora, p.Ciudad, p.Clasificacion, t.Estrato, " +
+                                                "l.Nombre || ' ' || l.Primer_Apellido || ' ' || Segundo_Apellido LIDER\n" +
+                                                "FROM Proyecto p \n" +
+                                                "JOIN Tipo t ON p.ID_Tipo = t.ID_Tipo \n" +
+                                                "JOIN Lider l ON p.ID_Lider = l.ID_Lider \n" +
+                                                "WHERE Banco_Vinculado = ? \n" +
+                                                "ORDER BY  Fecha_Inicio DESC, Ciudad, Constructora";
+
+    public List<ProyectoBancoVo> buscarComprasDeLider(String nombreBanco) throws SQLException {
+        List<ProyectoBancoVo> listaComprasDeLider = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement pstm = null;
+        ResultSet rs = null;
+
+        try {
+            connection = JDBCUtilities.getConnection();
+            pstm = connection.prepareStatement(queryProyectoBanco);
+            pstm.setString(1, nombreBanco);
+            rs = pstm.executeQuery();
+
+            while (rs.next()) {
+                ProyectoBancoVo proyectoBancoVo = new ProyectoBancoVo();
+                proyectoBancoVo.setIdProyecto(rs.getInt(1));
+                proyectoBancoVo.setConstructora(rs.getString(2));
+                proyectoBancoVo.setCiudad(rs.getString(3));
+                proyectoBancoVo.setClasificacion(rs.getString(4));
+                proyectoBancoVo.setEstrato(rs.getInt(5));
+                proyectoBancoVo.setLider(rs.getString(6));
+                listaComprasDeLider.add(proyectoBancoVo);
+            }
+
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pstm != null) {
+                pstm.close();
+            }
+
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        return listaComprasDeLider;
+    }
+
+}
+
+public class ComprasDeLiderVo {
+
+    private String lider;
+    private Double valor;
+
+    public String getLider() {
+        return lider;
+    }
+
+    public void setLider(String lider) {
+        this.lider = lider;
+    }
+
+    public Double getValor() {
+        return valor;
+    }
+
+    public void setValor(Double valor) {
+        this.valor = valor;
+    }
+
+    @Override
+    public String toString() {
+        return "ComprasDeLiderVo{" +
+                "lider='" + lider + '\'' +
+                ", valor=" + valor +
+                '}';
+    }
+}
+
+public class DeudasPorProyectoVo {
+
+    private Integer idProyecto;
+    private Double valor;
+
+    public Integer getIdProyecto() {
+        return idProyecto;
+    }
+
+    public void setIdProyecto(Integer idProyecto) {
+        this.idProyecto = idProyecto;
+    }
+
+    public Double getValor() {
+        return valor;
+    }
+
+    public void setValor(Double valor) {
+        this.valor = valor;
+    }
+
+    @Override
+    public String toString() {
+        return "DeudasPorProyectoVo{" +
+                "idProyecto=" + idProyecto +
+                ", valor=" + valor +
+                '}';
+    }
+}
+
+public class ProyectoBancoVo {
+
+    private Integer idProyecto;
+    private String constructora;
+    private String ciudad;
+    private String clasificacion;
+    private Integer estrato;
+    private String lider;
+
+    public Integer getIdProyecto() {
+        return idProyecto;
+    }
+
+    public void setIdProyecto(Integer idProyecto) {
+        this.idProyecto = idProyecto;
+    }
+
+    public String getConstructora() {
+        return constructora;
+    }
+
+    public void setConstructora(String constructora) {
+        this.constructora = constructora;
+    }
+
+    public String getCiudad() {
+        return ciudad;
+    }
+
+    public void setCiudad(String ciudad) {
+        this.ciudad = ciudad;
+    }
+
+    public String getClasificacion() {
+        return clasificacion;
+    }
+
+    public void setClasificacion(String clasificacion) {
+        this.clasificacion = clasificacion;
+    }
+
+    public Integer getEstrato() {
+        return estrato;
+    }
+
+    public void setEstrato(Integer estrato) {
+        this.estrato = estrato;
+    }
+
+    public String getLider() {
+        return lider;
+    }
+
+    public void setLider(String lider) {
+        this.lider = lider;
+    }
+
+    @Override
+    public String toString() {
+        return "ProyectoBancoVo{" +
+                "idProyecto=" + idProyecto +
+                ", constructora='" + constructora + '\'' +
+                ", ciudad='" + ciudad + '\'' +
+                ", clasificacion='" + clasificacion + '\'' +
+                ", estrato=" + estrato +
+                ", lider='" + lider + '\'' +
+                '}';
+    }
+}
+
+
+
+public class JDBCUtilities {
+    // Atributos de clase para gestión de conexión con la base de datos
+    private static final String UBICACION_BD = "ProyectosConstruccion.db";
+    public static Connection getConnection() throws SQLException {
+        String url = "jdbc:sqlite:" + UBICACION_BD;
+        return DriverManager.getConnection(url);
+    }
+}
+
+
+
+
+public class ReportesView {
+
+    private static final ReportesController controller = new ReportesController();
+
+    private String repitaCaracter(Character caracter, Integer veces) {
+        String respuesta = "";
+        for (int i = 0; i < veces; i++) {
+            respuesta += caracter;
+        }
+        return respuesta;
+    }
+
+    public void proyectosFinanciadosPorBanco(String banco) {
+        System.out.println(repitaCaracter('=', 36) + " LISTADO DE PROYECTOS POR BANCO "
+                + repitaCaracter('=', 37));
+        if (banco != null && !banco.isBlank()) {
+            System.out.println(String.format("%3s %-25s %-20s %-15s %-7s %-30s",
+                    "ID", "CONSTRUCTORA", "CIUDAD", "CLASIFICACION", "ESTRATO", "LIDER"));
+            System.out.println(repitaCaracter('-', 105));
+
+            List<ProyectoBancoVo> listaProyectos = controller.buscarComprasDeLider(banco);
+            for (ProyectoBancoVo proyecto : listaProyectos) {
+                System.out.printf("%3d %-25s %-20s %-15s %7d %-30s%n", proyecto.getIdProyecto(), proyecto.getConstructora(),
+                        proyecto.getCiudad(), proyecto.getClasificacion(), proyecto.getEstrato(), proyecto.getLider());
+            }
+        }
+    }
+
+    public void totalAdeudadoPorProyectosSuperioresALimite(Double limiteInferior) {
+        System.out.println(repitaCaracter('=', 1) + " TOTAL DEUDAS POR PROYECTO "
+                + repitaCaracter('=', 1));
+        if (limiteInferior != null) {
+            System.out.println(String.format("%3s %14s", "ID", "VALOR "));
+            System.out.println(repitaCaracter('-', 29));
+
+            List<DeudasPorProyectoVo> listaDeudas = controller.buscarDeudasPorProyecto(limiteInferior);
+            for (DeudasPorProyectoVo proyecto : listaDeudas) {
+                System.out.printf("%3d %,15.1f%n", proyecto.getIdProyecto(), proyecto.getValor());
+            }
+        }
+    }
+
+    public void lideresQueMasGastan() {
+        System.out.println(repitaCaracter('=', 6) + " 10 LIDERES MAS COMPRADORES "
+                + repitaCaracter('=', 7));
+        System.out.println(String.format("%-25s %14s", "LIDER", "VALOR "));
+        System.out.println(repitaCaracter('-', 41));
+
+        List<ComprasDeLiderVo> listaCompras = controller.buscarComprasDelLider();
+        for (ComprasDeLiderVo proyecto : listaCompras) {
+            System.out.printf("%-25s %,15.1f%n", proyecto.getLider(), proyecto.getValor());
+        }
+    }
+}
+

@@ -18,7 +18,7 @@ public class ProyectoBancoDao {
                                                 "WHERE Banco_Vinculado = ? \n" +
                                                 "ORDER BY  Fecha_Inicio DESC, Ciudad, Constructora";
 
-    public List<ProyectoBancoVo> buscarComprasDeLider(String nombreBanco) throws SQLException {
+    public List<ProyectoBancoVo> buscarProyectosBanco(String nombreBanco) throws SQLException {
         List<ProyectoBancoVo> listaComprasDeLider = new ArrayList<>();
         Connection connection = null;
         PreparedStatement pstm = null;

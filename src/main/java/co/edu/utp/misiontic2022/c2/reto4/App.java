@@ -8,8 +8,8 @@ public class App {
         ReportesView reportesView = new ReportesView();
 
         //1.Proyectos financiados por bancos
-        //var banco = "Bancolombia";
-        //reportesView.proyectosFinanciadosPorBanco(banco);
+        var banco = "Conavi";
+        reportesView.proyectosFinanciadosPorBanco(banco);
 
         //2. Deudas por proyecto
         //var limiteInferior = 100_000d;
